@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Json Tutorial</title>
+
+  <script src="https://aframe.io/releases/0.8.0/aframe.min.js"></script>
+  <script src="https://jeromeetienne.github.io/AR.js/aframe/build/aframe-ar.js"></script>
+</head>
+
+<body>
+  <a-scene embedded arjs>
+    <!--MARCADOR 1 LABORATORIO 1-->
+    <a-marker type='pattern' url='pathnuevomarka/pattern-prueba1.patt'>
+
+      <a-box position='0 1 0' material='color: green;'></a-box>
+
+
+      <a-text id="laboratorio1" font="kelsonsans" value="laboratorio1" width="6" position="-2.5 0.25 -1.5"
+        rotation="0 15 0">
+      </a-text>
+
+    </a-marker>
+    <a-entity camera></a-entity>
+
+    <!--MARCADOR 2 LABORATORIO 2-->
+    <a-marker type='pattern' url='pathnuevomarka/pattern-prueba2.patt'>
+
+      <a-box position='0 1 0' material='color: black;'></a-box>
+
+      <a-text font="kelsonsans" id="laboratorio2" value="laboratorio2" width="6" position="-2.5 0.25 -1.5"
+        rotation="0 15 0">
+      </a-text>
+    </a-marker>
+    <a-entity camera></a-entity>
+
+    <!--MARCADOR 3 LABORATORIO 3-->
+    <a-marker type='pattern' id="your_marker_id" markerhandler cursor="rayOrigin: mouse" emitevents="true"
+      url='pathnuevomarka/pattern-prueba33.patt'>
+
+      <a-box position='0 1 0' material='color: blue;'></a-box>
+
+      <a-text id="laboratorio3" font="kelsonsans" value="laboratorio3" width="6" position="-2.5 0.25 -1.5"
+        rotation="0 15 0">
+      </a-text>
+    </a-marker>
+    <a-entity camera></a-entity>
+  </a-scene>
+  <script>
+    var intervalID = window.setInterval(actiualizarLaboratorios, 500);
+    actiualizarLaboratorios();
+    //TODO: consumir servicios web cada n segundos para actiualizar la propiedad value de
+    // cada marcador ENVIANDO EL DIA Y HORA OBTENER LA INFO DEL HORARIO
+    function actiualizarLaboratorios() {
+
+      sendRequest("laboratorio1");
+      sendRequest("laboratorio2");
+      sendRequest("laboratorio3");
+
+    }
+
+    function sendRequest(laboratorio) {
+      //obtener hora actual 
+      var fechaActual = new Date();
+      var fechaFormatoHHMMSS= fechaActual.toLocaleTimeString()
+
+      fetch('http://localhost:8085/horario/consultar', {
+        method: "POST",
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ laboratorioid: laboratorio, hora: fechaFormatoHHMMSS })
+      })
+        .then(response => response.json())
+        .then(function (json) {
+          // Display items here
+          console.log("++++++++++++++RESULTADOAPI+++++++++++++++++++");
+          console.log(json)
+          console.log("Renderizando");
+          if (!isEmpty(json)) {
+            document.getElementById(laboratorio).setAttribute("value", "Materia: " + json[0].materia + " \Docente: " + json[0].docente + " \nHorario: " + json[0].horainicio + "-" + json[0].horafin);
+          }
+
+          // document.getElementById("lab2").setAttribute("value", "clase2 " + Math.random());
+          //  document.getElementById("lab3").setAttribute("value", "clase3  " + Math.random());
+
+        }
+
+        );
+    }
+
+    function isEmpty(arg) {
+      for (var item in arg) {
+        return false;
+      }
+      return true;
+    }
+    //To avoid playing from start if the marker flickers, not sure if needed, but it might be a failsafe when you have mutiple markers and want to make sure the first finishes before launching the second
+
+    //HTML5 audio, will need user touch input to start on mobile
+
+    //Detect end of audio
+
+
+    /* AFRAME.registerComponent('markerhandler', {
+       init: function () {
+         // Set up the tick throttling. Will check if marker is active every 500ms
+         this.tick = AFRAME.utils.throttleTick(this.tick, 500, this);
+       },
+       tick: function (t, dt) {
+
+         if (document.querySelector("#your_marker_id").object3D.visible == true) {
+           // MARKER IS PRESENT
+
+           console.log("presente");
+           //intro.play();
+           //playing = true;
+         } else {
+           console.log("novisible");
+           // MARKER IS HIDDEN, do nothing (up to you)
+         }
+
+       }
+     });*/
+  </script>
+
+
+  <!--   <ul id="laboratorios"></ul> -->
+</body>
+
+</html>

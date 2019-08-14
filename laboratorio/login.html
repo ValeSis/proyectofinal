@@ -1,0 +1,108 @@
+<html>
+
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/vue.resource/1.2.0/vue-resource.min.js"></script>
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="util.js"></script>
+
+</head>
+
+<body>
+
+    <!--<div id="myDiv">
+        <div v-if="response._id">
+            <h2>{{ response.titulo }} &nbsp;Creado:{{ response.fechaCreacion }}</h2>
+            <div>
+                <div v-html="response.contenido">
+                </div>
+            </div>
+        </div>
+        <div v-if="response.error">
+            <p>Request failed</p>
+        </div>
+    </div>-->
+    <!--LOGIN-->
+    <section id="loginSection">
+        
+        <div id="logindiv" class="container">
+                <h1>Login</h1>
+                <hr>
+            <input v-model="username1" placeholder="username">
+            <input v-model="password1" placeholder="password">
+            <!-- `greet` is the name of a method defined below -->
+            <button v-on:click="greet" class="waves-effect waves-light btn " style="width: 100%">LOGIN</button>
+        </div>
+
+    </section>
+       <br><br><br>
+
+
+</body>
+
+<script>
+  mainUrl= "localhost:8085";
+    Vue.http.options.emulateJSON = true;
+    //login vuejs
+    var example2 = new Vue({
+        el: '#logindiv',
+        data: {
+            username1: '',
+            password1: ''
+        },
+        // define methods under the `methods` object
+        methods: {
+            greet: function (event) {
+                $.ajax({
+                    method: "post",
+                    type: "POST",
+                    url: "http://"+mainUrl+"/user/login",
+                    headers: {
+                        "Content-Type": "application/json"
+
+                    },
+                    data: JSON.stringify({
+                        username: this.username1,
+                        password: this.password1
+                    }),
+                    contentType: 'application/json',
+                    processData: false,
+
+                }).then(function (response) {
+                    console.log(response);
+                    if (response.msg == "success") {
+                        alert("login exitoso");
+                        setCookie("username", response.username, 30);
+                        setCookie("tipo", response.tipo, 30);
+                        setCookie("userid", response._id, 30);
+
+                        if(response.tipo=="ADMINISTRADOR"){
+                            window.location.href = "/principal_admin.html";
+                        }
+                        else{
+                            window.location.href = "/escanear.html";
+                        }
+                    }
+                    else {
+                        alert("login fallido:" + JSON.stringify(response));
+                    }
+
+
+                }).catch(function (error) {
+                    alert("login fallido:" + JSON.stringify(error));
+                });
+            }
+        }
+    });
+
+  
+
+</script>
+
+</html>

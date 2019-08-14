@@ -1,0 +1,302 @@
+<html>
+
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/vue.resource/1.2.0/vue-resource.min.js"></script>
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="util.js"></script>
+    <script>checkSessionActive();  </script>
+
+</head>
+
+<body>
+    <button onclick="goBack()">Regresar</button>
+    <button onclick="logoutCookie()" style="float: right">Logout</button>
+
+    <div class="card-panel" style="float: right">
+        <span class="blue-text text-darken-2" id="usernameLabel">This is a card panel with dark blue text</span>
+    </div>
+
+
+
+    <!--crear Posts-->
+    <section id="crearPost">
+
+        <div id="crearPostdiv" class="container">
+            <h1>Crear Usuario</h1>
+            <hr>
+            <input v-model="username" placeholder="username">
+            <input v-model="password" placeholder="password">
+            <input v-model="name" placeholder="name">
+            <input v-model="email" placeholder="email">
+            <span>Tipo: {{ tipo }}</span>
+            <select v-model="tipo" style="    display: block;">
+                <option v-for="option in options" v-bind:value="option.value">
+                    {{ option.text }}
+                </option>
+            </select>
+
+
+
+            <button v-on:click="createPost" class="waves-effect waves-light btn " style="width: 100%">CREAR</button>
+        </div>
+
+    </section>
+    <!--listar post-->
+    <section id="listaPost" class="container">
+        <h1>Lista de Usuarios</h1>
+        <hr />
+
+        <div id="listDiv" class="row">
+            <table class="striped">
+                <thead>
+                    <tr>
+                        <th>id</th>
+                        <th>Nombre</th>
+                        <th>Usuario</th>
+                        <th>Password</th>
+                        <th>Tipo</th>
+                    </tr>
+                </thead>
+
+
+
+                <tbody>
+                    <tr v-for="post1 in postsList">
+
+                        <td>{{post1._id}}</td>
+                        <td>{{post1.name}}</td>
+                        <td>{{post1.username}}</td>
+                        <td>{{post1.password}}</td>
+                        <td>{{post1.tipo}}</td>
+
+
+                    </tr>
+
+
+                </tbody>
+
+
+            </table>
+
+
+        </div>
+    </section>
+
+    <!--listar laboratorios-->
+    <section id="listaLaboratorios">
+        <h3>Lista de Laboratorios</h3>
+        <hr />
+
+        <div id="listLaboratorioDiv" class="row">
+            <table class="striped">
+                <thead>
+                    <tr>
+                        <th>id</th>
+                        <th>Nombre</th>
+                        <th>Descripcion</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="item in laboratoriosList">
+
+                        <td>{{item._id}}</td>
+                        <td>{{item.nombre}}</td>
+                        <td>{{item.descripcion}}</td>
+
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!--listar listHorarioDiv-->
+    <section id="listaHorarios">
+        <h3>Lista de Horarios</h3>
+        <hr />
+
+        <div id="listHorarioDiv" class="row">
+            <table class="striped">
+                <thead>
+                    <tr>
+                        <th>Laboratorio</th>
+                        <th>Materia</th>
+                        <th>Hora Inicio</th>
+                        <th>Hora Fin</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="item in horariosList">
+
+                        <td>{{item.laboratorioid}}</td>
+                        <td>{{item.materia}}</td>
+                        <td>{{item.horainicio}}</td>
+                        <td>{{item.horafin}}</td>
+
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <br><br><br>
+    <script>
+        mainUrl = "localhost:8085";
+        Vue.http.options.emulateJSON = true;
+        //listar post vuejs
+        var vm1 = new Vue({
+            el: '#listDiv',
+            data: {
+                postsList: {},
+                tipouser: getCookie("tipo")
+            },
+            created() {
+                this
+                    .$http
+                    .get("http://" + mainUrl + "/user/getAll")
+                    .then(function (response) {
+                        console.log("response get all users");
+                        console.log(response)
+                        this.postsList = response.data
+                        console.log(this.postsList)
+                    })
+            },
+            methods: {
+
+                deletePost: function (id) {
+                    $.ajax({
+                        method: "delete",
+                        type: "DELETE",
+                        url: "http://" + mainUrl + "/posts/" + id,
+                        headers: {
+                            "Content-Type": "application/json"
+
+                        },
+                        contentType: 'application/json',
+                        processData: false,
+
+                    }).then(function (response) {
+                        console.log(response);
+                        if (response.msg == "success") {
+                            alert("Operacion exitosa");
+                            location.reload();
+                        }
+                        else {
+                            alert("error:" + JSON.stringify(response));
+                        }
+
+
+                    }).catch(function (error) {
+                        alert("error:" + JSON.stringify(error));
+                    });
+                }
+            }
+        });
+        //crear post vuejs
+        var vuecreatepost = new Vue({
+            el: '#crearPostdiv',
+            data: {
+                username: '',
+                password: '',
+                name: '',
+                tipo: 'USUARIO',
+                email: '',
+                selected: 'A',
+                options: [
+                    { text: 'USUARIO', value: 'USUARIO' },
+                    { text: 'ADMINISTRADOR', value: 'ADMINISTRADOR' }
+                ]
+            },
+            // define methods under the `methods` object
+            methods: {
+                createPost: function (event) {
+                    $.ajax({
+                        method: "post",
+                        type: "POST",
+                        url: "http://" + mainUrl + "/user/create",
+                        headers: {
+                            "Content-Type": "application/json"
+
+                        },
+                        data: JSON.stringify({
+                            username: this.username,
+                            password: this.password,
+                            name: this.name,
+                            tipo: this.tipo,
+                            email: this.email
+                        }),
+                        contentType: 'application/json',
+                        processData: false,
+
+                    }).then(function (response) {
+                        console.log(response);
+                        if (response.msg == "success") {
+                            alert("Operacion exitosa");
+                            location.reload();
+                        }
+                        else {
+                            alert("error:" + JSON.stringify(response));
+                        }
+
+
+                    }).catch(function (error) {
+                        alert("error:" + JSON.stringify(error));
+                    });
+                }
+            }
+        });
+
+        //listar laboratorios vuejs
+        var vm1 = new Vue({
+            el: '#listLaboratorioDiv',
+            data: {
+                laboratoriosList: {},
+                tipouser: getCookie("tipo")
+            },
+            created() {
+                this
+                    .$http
+                    .get("http://" + mainUrl + "/laboratorio/getAll")
+                    .then(function (response) {
+                        console.log("response get all laboratorio");
+                        console.log(response)
+                        this.laboratoriosList = response.data
+                        console.log(this.laboratoriosList)
+                    })
+            }
+
+        });
+        //listar horarios vuejs
+        var vm1 = new Vue({
+            el: '#listHorarioDiv',
+            data: {
+                horariosList: {},
+                tipouser: getCookie("tipo")
+            },
+            created() {
+                this
+                    .$http
+                    .get("http://" + mainUrl + "/horario/getAll")
+                    .then(function (response) {
+                        console.log("response get all laboratorio");
+                        console.log(response)
+                        this.horariosList = response.data
+                        console.log(this.horariosList)
+                    })
+            }
+
+        });
+
+        cargarDatosUsuario("usernameLabel");
+    </script>
+
+
+</body>
+
+
+</html>
