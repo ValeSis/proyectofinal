@@ -22,7 +22,7 @@ app.use(allowCrossDomain);
 */
 mongoose
   .connect(
-    'mongodb://mongo:27018/docker-node-mongo',
+    'mongodb://mongo:27017/docker-node-mongo',
     { useNewUrlParser: true }
   )
   .then(() => console.log('MongoDB Connected SUCCESS'))
@@ -278,7 +278,7 @@ app.post('/user/login', (req, res) => {
 
 
 // Port
-const port = 3000;
+const port = 3001;
 
 //app.listen(port, () => console.log('Server running...'));
 
