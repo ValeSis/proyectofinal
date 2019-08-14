@@ -22,7 +22,7 @@ app.use(allowCrossDomain);
 */
 mongoose
   .connect(
-    'mongodb://mongo:27017/docker-node-mongo',
+    'mongodb://mongo:27018/docker-node-mongo',
     { useNewUrlParser: true }
   )
   .then(() => console.log('MongoDB Connected SUCCESS'))
